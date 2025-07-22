@@ -10,7 +10,7 @@ function App() {
             <div className="max-w-5xl mx-auto md:flex md:items-center md:justify-around">
                 <div>
                     <Form
-                        fetchClima={fetchClima()}
+                        fetchClima={fetchClima}
                     />
                 </div>
                 <p>2</p>

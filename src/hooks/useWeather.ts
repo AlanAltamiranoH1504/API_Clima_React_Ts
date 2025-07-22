@@ -1,7 +1,43 @@
-export default function useWeather() {
+import axios from 'axios';
+import type {ClimaBuqueda, ClimaResponse} from "../types";
 
-    const fetchClima = () => {
-        console.log("Consultando")
+function isWeatherResponse(clima: unknown): clima is ClimaResponse {
+    return (
+        Boolean(clima) &&
+        typeof clima === "object" &&
+        typeof (clima as ClimaResponse).name === "string" &&
+        typeof (clima as ClimaResponse).main.temp === "number" &&
+        typeof (clima as ClimaResponse).main.temp_max === "number" &&
+        typeof (clima as ClimaResponse).main.temp_min === "number"
+    )
+}
+
+export default function useWeather() {
+    const fetchClima = async (data: ClimaBuqueda) => {
+        try {
+            const {city, pais} = data;
+            const API_KEY: string = import.meta.env.VITE_API_KEY_CLIMA;
+            const endpointAPI: string = `http://api.openweathermap.org/geo/1.0/direct?q=${city},${pais}&appid=${API_KEY}`;
+
+            const response = await axios.get(endpointAPI);
+            const lat: string = response.data[0].lat;
+            const lng: string = response.data[0].lon;
+
+            const endpointAPI2: string = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${API_KEY}`;
+
+            // Type Guards
+            const response_two = await axios.get(endpointAPI2);
+            const result: boolean = isWeatherResponse(response_two.data);
+            console.log(result);
+            // const name = response_two.data.name;
+            // const main = response_two.data.main;
+
+
+        } catch (e) {
+            console.log("Error en petcion de primera api");
+            // @ts-ignore
+            console.log(e.message);
+        }
     }
     return {
         fetchClima

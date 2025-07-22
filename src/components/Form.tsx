@@ -2,13 +2,13 @@ import {useForm} from "react-hook-form";
 import {countries} from "../data/countries.ts";
 import type {ClimaBuqueda} from "../types";
 type FormProps = {
-    fetchClima: () => void
+    fetchClima: (data: ClimaBuqueda) => Promise<void>
 }
 
 const Form = ({fetchClima}: FormProps) => {
     const {register, handleSubmit, formState: {errors}} = useForm<ClimaBuqueda>();
     const peticionBusquedaClima = (data: ClimaBuqueda) => {
-        fetchClima();
+        fetchClima(data);
     }
 
     return (
@@ -16,9 +16,9 @@ const Form = ({fetchClima}: FormProps) => {
             <form className="space-y-5 text-white"
                   onSubmit={handleSubmit(peticionBusquedaClima)}
             >
-                <div>
+                <div className="">
                     <label htmlFor="city" className="font-fjalla block text-2xl uppercase  mb-2">Ciudad:</label>
-                    <input id="city" type="text" className="w-full p-2 font-fjalla rounded-lg text-black"
+                    <input id="city" type="text" className="w-full px-24 border-2 p-2 font-fjalla rounded-lg text-white bg-transparent"
                            placeholder="Ingresa tu ciudad"
                            {...register("city", {
                                required: "La ciudad es obligatoria"
@@ -30,7 +30,7 @@ const Form = ({fetchClima}: FormProps) => {
                 </div>
                 <div>
                     <label htmlFor="pais" className="font-fjalla block text-2xl uppercase mb-2">Pais:</label>
-                    <select id="pais" className="w-full p-2 px-24 text-black rounded-lg font-fjalla"
+                    <select id="pais" className="w-full p-2 text-white rounded-lg font-fjalla bg-transparent border-2"
                             {...register("pais", {
                                 required: "El pais es obligatorio"
                             })}
