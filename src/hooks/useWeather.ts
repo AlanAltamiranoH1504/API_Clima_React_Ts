@@ -1,18 +1,28 @@
 import axios from 'axios';
 import type {ClimaBuqueda, ClimaResponse} from "../types";
+import {z} from "zod";
+import {toast} from "react-toastify";
+import {useState} from "react";
 
-function isWeatherResponse(clima: unknown): clima is ClimaResponse {
-    return (
-        Boolean(clima) &&
-        typeof clima === "object" &&
-        typeof (clima as ClimaResponse).name === "string" &&
-        typeof (clima as ClimaResponse).main.temp === "number" &&
-        typeof (clima as ClimaResponse).main.temp_max === "number" &&
-        typeof (clima as ClimaResponse).main.temp_min === "number"
-    )
-}
+const schemaResponseApi = z.object({
+    name: z.string(),
+    main: z.object({
+        temp: z.number(),
+        temp_max: z.number(),
+        temp_min: z.number(),
+    })
+});
 
 export default function useWeather() {
+    const [clima, setClima] = useState<ClimaResponse>({
+        name: "",
+        main: {
+            temp: 0,
+            temp_max: 0,
+            temp_min: 0,
+        }
+    });
+
     const fetchClima = async (data: ClimaBuqueda) => {
         try {
             const {city, pais} = data;
@@ -24,22 +34,20 @@ export default function useWeather() {
             const lng: string = response.data[0].lon;
 
             const endpointAPI2: string = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${API_KEY}`;
-
-            // Type Guards
             const response_two = await axios.get(endpointAPI2);
-            const result: boolean = isWeatherResponse(response_two.data);
-            console.log(result);
-            // const name = response_two.data.name;
-            // const main = response_two.data.main;
-
-
+            const result = schemaResponseApi.safeParse(response_two.data);
+            if (result) {
+                toast.success("Consulta tu clima");
+                setClima(result.data);
+            } else {
+                toast.error("Error en obtencion de clima");
+            }
         } catch (e) {
             console.log("Error en petcion de primera api");
-            // @ts-ignore
-            console.log(e.message);
         }
     }
     return {
-        fetchClima
+        fetchClima,
+        clima
     }
 }
